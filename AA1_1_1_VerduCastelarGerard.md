@@ -19,9 +19,9 @@ Que sigui d'accés alesatori significa que la CPU pot accedir a qualsevol ubicac
 
 ```
 Podem veure el model de CPU que tenim mitjançant: cat /proc/cpuinfo
-
-![model_cpu](Captures_activitat_avaluable/model_processador.png)
 ```
+![model_cpu](Captures_activitat_avaluable/model_processador.png)
+
 
 ## Sistemes operatius
 
@@ -78,26 +78,26 @@ La filosofia UNIX, abans de ser un sistema operatiu privatiu, es basava en el ll
 
 ```
 "echo": mostra text per pantalla.
-
+```
 ![comanda_echo](Captures_activitat_avaluable/echo.png)
-
+```
 "bash": executa el programa Bash.
-
+```
 ![comanda_bash](Captures_activitat_avaluable/bash.png)
-
+```
 "touch": crea un nou arxiu.
-
+```
 ![comanda_touch](Captures_activitat_avaluable/touch.png)
-
+```
 "read": llegeix la informació introduida amb el teclat i la guarda en una variable.
-
+```
 ![comanda_read](Captures_activitat_avaluable/read.png)
-
+```
 "sleep": pausa un procés durant el temps especificat per l'usuari.
-
+```
 ![comanda_sleep](Captures_activitat_avaluable/sleep_1.png)
 ![comanda_sleep2](Captures_activitat_avaluable/sleep 2.png)
-```
+
 
 #### 9. Fes un script amb “nano” d’una vaca que saluda i mostra el contingut del directori que demana. Necessitaràs les comandes vistes en el punt anterior.
 
@@ -109,10 +109,10 @@ La filosofia UNIX, abans de ser un sistema operatiu privatiu, es basava en el ll
 
 **d. El programa s’espera 2 segons.**
 
-```
+
 ![creacio_cowsay](Captures_activitat_avaluable/script_cowsay.png)
 ![execucio_cowsay](Sistemes_informatics/Captures_activitat_avaluable/execucio_cowsay.png)
-```
+
 
 #### 10. Investiga com pots mostrar el resultat d’una comanda amb un altre color i explica cada paràmetre que has utilitzat.
 
@@ -127,9 +127,9 @@ Per a canvia el color del resultat d'una comanda s'utilitza: -e "\e[36m HOLA ERI
 ```
 **a. Posa exemples usant altres colors.**
 
-```
+
 ![exemples_colors](Captures_activitat_avaluable/canvi_colors.png)
-```
+
 
 ## Control de versions
 
