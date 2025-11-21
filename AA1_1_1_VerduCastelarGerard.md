@@ -96,6 +96,7 @@ La filosofia UNIX, abans de ser un sistema operatiu privatiu, es basava en el ll
 "sleep": pausa un procés durant el temps especificat per l'usuari.
 ```
 ![comanda_sleep](Captures_activitat_avaluable/sleep_1.png)
+
 ![comanda_sleep2](Captures_activitat_avaluable/sleep 2.png)
 
 
