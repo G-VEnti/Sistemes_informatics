@@ -112,7 +112,8 @@ La filosofia UNIX, abans de ser un sistema operatiu privatiu, es basava en el ll
 
 
 ![creacio_cowsay](Captures_activitat_avaluable/script_cowsay.png)
-![execucio_cowsay](Sistemes_informatics/Captures_activitat_avaluable/execucio_cowsay.png)
+
+![execucio_cowsay](Captures_activitat_avaluable/execucio_cowsay.png)
 
 
 #### 10. Investiga com pots mostrar el resultat d’una comanda amb un altre color i explica cada paràmetre que has utilitzat.
