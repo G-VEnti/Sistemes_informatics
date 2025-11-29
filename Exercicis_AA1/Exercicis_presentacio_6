@@ -1,0 +1,41 @@
+# **Exercicis presentació 6**
+
+## **Exercici 3:** Utilitza dues màquines virtuals Linux i explora la comunicació amb elles.
+
+* **Comprova l’adreça IP amb la comanda $ ip -c a i explica els següents elements (IP,
+direcció MAC, dispositiu de xarxa i state UP/DOWN).**
+
+* **• Configura les dues màquines amb NAT i fes ping entre elles. Explica el resultat.**
+
+* **Configura les dues màquines amb Adaptador pont i fes ping entre elles. Explica el
+resultat.**
+
+## **Exercici 4:** Utilitza dues màquines virtuals amb Linux i analitza la teva configuració de xarxa:
+
+* **Per cada interfície, indica si està activa, si té una IP assignada i si és IPv4 o IPv6.**
+
+* **Quina configuració de xarxa necessiten dues màquines perquè es puguin fer ping?**
+
+    **Quina relació hi ha amb les IP públiques o privades?**
+
+## **Exercici 5:** Investiga i respon amb les teves paraules.
+
+* **Per què el disseny original d’Internet és tan eficient i robust? Explica tres pilars que
+permeten que la comunicació funcioni encara que hi hagi errors o caigudes de
+connexions.**
+
+* **Què és un port? Per a què serveix dins d’una comunicació?**
+
+* **Busca i explica breument què són els protocols següents i indica quin port utilitzen
+per defecte:**
+
+    * **HTTP**
+    * **HTTPS**
+    * **FTP**
+    * **SFTP**
+    * **MySQL**
+
+* **Per què alguns protocols acaben amb TP?**
+
+* **Investiga quin és el protocol UDP i explica per què s’utilitza en molts de videojocs
+online.**
