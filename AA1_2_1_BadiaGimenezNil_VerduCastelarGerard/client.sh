@@ -2,11 +2,12 @@
 
 #telnet 10.40.2.115 23 IP Nil
 
-SERVER_IP="192.168.56.101"
+SERVER_IP="10.0.2.15"
 PORT=60000
 
 #Enviament de capçalera
 echo "HELLO" | nc -q 0 $SERVER_IP $PORT
+echo "Capcalera enviada, esperant permis de connexio..."
 
 #Esperant rebuda de capçalera
 response=$(nc -l -p $PORT)
@@ -15,9 +16,9 @@ if [[ "$response" != "OK" ]]; then
   exit 1
 fi
 
-echo "Connexió establerta"
+echo "Permis concedit, connexió establerta"
 
-while true; do
+while [[ "$response"]]; do
 
   echo "Esperant el torn ..."
 
@@ -29,15 +30,8 @@ while true; do
   # TODO: Gestió de missatges rebuts
 
   # SERVER_WIN  
-  if [[ "$response" == "SERVER_WIN" ]]; then
-    echo "Partida finalitzada"
-    exit 0
-  fi
-
-  # CLIENT_WIN
-  if [[ "$response" == "CLIENT_WIN" ]]; then
-    echo "Partida finalitzada"
-    exit 0
+  if [[ "$response" = "SERVER_WIN" || "$response" = "CLIENT_WIN" || "$response" = "Empat" ]]; then
+    break
   fi
 
   # ...
@@ -50,5 +44,7 @@ while true; do
   echo $clientPos | nc -q 0 $SERVER_IP $PORT
 
 done
+
+echo "Partida finalitzada"
 
 exit 0

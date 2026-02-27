@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 0.1 Constants i variables de configuració global
-CLIENT_IP="192.168.56.101"
+CLIENT_IP="10.0.2.15"
 PORT=60000
 BOARD=(1 2 3 4 5 6 7 8 9)
 
@@ -115,89 +115,128 @@ check_valid_pos() {
 }
 
 
+
+
+# Missatge de benvinguda
+echo "Programa iniciat, benvingut" | tee -a $LOG_FILE
+
 # 1 Espera connexió
-echo "Esperant connexió..."
+echo "Esperant connexió..." | tee -a $LOG_FILE
 
 #Esperant rebuda de capçalera
 msg=$(nc -l -p $PORT)
 
 # 2.1 Si la connexió no és un "HELLO", s'envia un "KO" i es tanca el programa
 if [[ "$msg" != "HELLO" ]]; then
-  echo "KO" | nc -q 0 $CLIENT_IP $PORT
+  echo "KO" | nc -q 0 $CLIENT_IP $PORT 
+  echo "[ERROR] Capcalera rebuda incorrecte." | tee -a $LOG_FILE
   exit 1
+else
+  # 2.2 Si la connexió és "HELLO", s'envia un "OK" i es continua el programa
+  read -p "Escriu OK si vols permetre la connexio (escriu qualsevol altre cosa per denegarla): " connexionCheck
+  echo "$connexionCheck" | tee -a $LOG_FILE | nc -q 0 $CLIENT_IP $PORT  
 fi
 
-# 2.2 Si la connexió és "HELLO", s'envia un "OK" i es continua el programa
-# If inclos per enviar resposta al client quan arriba el HELLO
-if [[ "$msg" == "HELLO" ]]; then
-  echo "OK" | nc -q 0 $CLIENT_IP $PORT
+if [[ "$connexionCheck" = "OK" ]]; then
+  echo "Connexio establerta" | tee -a $LOG_FILE
+else
+  echo "Connexio denegada, finalitzacio del programa." | tee -a $LOG_FILE
+  exit 0
 fi
+
 
 # 3 Missatge de benvinguda a la partida
 echo "Benvinguts al tres en ratlla"
-# 3.1 Es printa el tauler buit
-print_board
 
-#S'envia el tauler al client
-#print_board | nc -q 0 $CLIENT_IP $PORT
+# S'envia aquest missatge al log
+echo "Partida iniciada" >> $LOG_FILE
+
+# Contador per a la condicio d'empat
+movementCounter=1
+
 
 # 4 GameLoop
-while [[ "$result" != "WIN" ]]; do
+while [[ "$movementCounter" -le 9 ]]; do  
+
+  echo "Moviment: $movementCounter" | tee -a $LOG_FILE
+
+  # 3.1 Es printa el tauler buit
+  print_board
 
   # == TORN SERVIDOR ==
 
   # 4.1 Es demana una posició al jugador servidor
   # pos - guarda linput de lusuari
   read -p "Posició del servidor (1-9): " pos
+  echo "Posició del servidor (1-9): $pos" >> $LOG_FILE
+
+  # Crida de la funcio per a comprobar que la posicio introduida es valida
+  valid_pos=$(check_valid_pos "$pos")
 
   # board_index - guarda el resultat de $(( ... ))
   board_index=$((pos - 1))
-
+  
   # assigna "O" a la casella BOARD[...]
   BOARD[$board_index]="O"
 
   # 4.2 Es comprova si s'ha guanyat (result="WIN" o result="NONE")
   result=$(check_win)
+
   if [[ "$result" == "WIN" ]]; then
-    # S'envia un "SERVER_WIN" al client
-    echo "SERVER_WIN" | nc -q 0 $CLIENT_IP $PORT
-    echo "SERVER_WIN"
+    # S'envia un "SERVER_WIN" al client i es mostra per pantalla
+    echo "SERVER_WIN" | tee >(nc -q 0 $CLIENT_IP $PORT)
     print_board
-    echo "Partida finalitzada"
-    exit 0
+    # Es mostra per pantalla el missatge i s'envia al fitxer log
+    break
   fi
 
-  # 4.3 Es printa el tauler
-  print_board
-  echo "Torn del client"
+  if [[ "$movementCounter" -lt 9 ]]; then
 
-  # == TORN CLIENT ==
-  # 4.4 S'envia al client que comença el seu torn
-  echo "Et toca: " | nc -q 0 $CLIENT_IP $PORT
+    # 4.3 Es printa el tauler
+    ((++movementCounter))
+    echo "Moviment: $movementCounter" | tee -a $LOG_FILE
+    print_board
+    echo "Torn del client..." | tee -a $LOG_FILE
 
-  # 4.5 Es llegeix el moviment del client
-  response=$(nc -l -p $PORT)
+    # == TORN CLIENT ==
+    # 4.4 S'envia al client que comença el seu torn
+    echo "Et toca: " | tee -a $LOG_FILE | nc -q 0 $CLIENT_IP $PORT 
 
-  # 4.6 S'actualitza el moviment al tauler
-  response=$(($response - 1))
-  BOARD[$response]="X"
+    # 4.5 Es llegeix el moviment del client
+    response=$(nc -l -p $PORT)
 
-  # 4.7 Es comprova si s'ha guanyat (result="WIN" o result="NONE")
-  result=$(check_win)
-  if [[ "$result" == "WIN" ]]; then
-    # S'envia un "SERVER_WIN" al client
-    echo "CLIENT_WIN" | nc -q 0 $CLIENT_IP $PORT
-    echo "CLIENT_WIN"
-  fi
-
-  # 4.8 Es printa el tauler
-  print_board
+    # Crida de la funcio per a comprobar que la posicio introduida es valida
+    valid_pos=$(check_valid_pos "$response")
   
-  if [[ "$result" == "WIN" ]]; then
-    echo "Partida finalitzada"
-    exit 0
+    # Mostra el missatge i l'envia al log
+    echo "Posició del client (1-9): $response" | tee -a $LOG_FILE
+
+    # 4.6 S'actualitza el moviment al tauler
+    response=$(($response - 1))
+    BOARD[$response]="X"
+
+    # 4.7 Es comprova si s'ha guanyat (result="WIN" o result="NONE")
+    result=$(check_win)
+    if [[ "$result" == "WIN" ]]; then
+    # S'envia un "CLIENT_WIN" al client, al arxiu log y es mostra per pantalla
+    echo "CLIENT_WIN" | tee -a $LOG_FILE | nc -q 0 $CLIENT_IP $PORT
+    echo "CLIENT_WIN"
+    fi
   fi
+  # 4.8 Es printa el tauler
+  print_board 
+
+  ((++movementCounter))
+  
 
 done
+
+if [[ "$result" != "WIN" ]]; then
+  echo "Empat" | tee -a $LOG_FILE | nc -q 0 $CLIENT_IP $PORT
+  echo "Empat"
+fi
+
+# Es mostra per pantall i s'envia al log el missatge
+echo "Partida finalitzada, fins la proxima :)" | tee -a $LOG_FILE
 
 exit 0
