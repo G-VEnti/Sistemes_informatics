@@ -1,53 +1,202 @@
 #!/bin/bash
 
-#telnet 10.40.2.115 23 IP Nil
-
-SERVER_IP="192.168.56.101"
+# 0.1 Constants i variables de configuració global
+CLIENT_IP="192.168.56.101"
 PORT=60000
+BOARD=(1 2 3 4 5 6 7 8 9)
 
-#Enviament de capçalera
-echo "HELLO" | nc -q 0 $SERVER_IP $PORT
+
+
+# 0.2 Afegeix configuració continguda al fitxer utils.sh
+#   'source $file' executa el contingut de $file en el mateix entorn de shell,
+#     és a dir, defineix codi (funcions, variables...) que passa a estar disponible
+#     a la sessió de shell actual (a la nostra terminal).
+#     Afegint 'source $file' tant al client com al servidor, podem reutilitzar
+#     tot el codi de $file sense duplicar-lo.
+LOG_FILE="server.log"
+source utils.sh
+
+
+# 0.3 Definició de la funció que printa el tauler
+print_board() {
+  echo " ${BOARD[0]} | ${BOARD[1]} | ${BOARD[2]} "
+  echo "---+---+---"
+  echo " ${BOARD[3]} | ${BOARD[4]} | ${BOARD[5]} "
+  echo "---+---+---"
+  echo " ${BOARD[6]} | ${BOARD[7]} | ${BOARD[8]} "
+}
+
+
+
+# 0.4 Envia a stdout si s'ha guanyat la partida (echo "WIN" o echo "NONE")
+check_win() {
+  # = Comprovació de files =
+  # Fila 1: posicions 0,1,2
+  if [[ "${BOARD[0]}" == "${BOARD[1]}" && "${BOARD[1]}" == "${BOARD[2]}" ]]; then
+    echo "WIN"
+    return
+  fi
+
+  # Fila 2: posicions 3,4,5
+  if [[ "${BOARD[3]}" == "${BOARD[4]}" && "${BOARD[4]}" == "${BOARD[5]}" ]]; then
+    echo "WIN"
+    return
+  fi
+
+  # Fila 3: posicions 6,7,8
+  if [[ "${BOARD[6]}" == "${BOARD[7]}" && "${BOARD[7]}" == "${BOARD[8]}" ]]; then
+    echo "WIN"
+    return
+  fi
+
+  # = Comprovació de columnes =
+  # Columna 1: posicions 0,3,6
+  if [[ "${BOARD[0]}" == "${BOARD[3]}" && "${BOARD[3]}" == "${BOARD[6]}" ]]; then
+    echo "WIN"
+    return
+  fi
+
+  # Columna 2: posicions 1,4,7
+  if [[ "${BOARD[1]}" == "${BOARD[4]}" && "${BOARD[4]}" == "${BOARD[7]}" ]]; then
+    echo "WIN"
+    return
+  fi
+
+  # Columna 3: posicions 2,5,8
+  if [[ "${BOARD[2]}" == "${BOARD[5]}" && "${BOARD[5]}" == "${BOARD[8]}" ]]; then
+    echo "WIN"
+    return
+  fi
+
+  # = Comprovació de diagonals =
+  # Diagonal principal: 0,4,8
+  if [[ "${BOARD[0]}" == "${BOARD[4]}" && "${BOARD[4]}" == "${BOARD[8]}" ]]; then
+    echo "WIN"
+    return
+  fi
+
+  # Diagonal inversa: 2,4,6
+  if [[ "${BOARD[2]}" == "${BOARD[4]}" && "${BOARD[4]}" == "${BOARD[6]}" ]]; then
+    echo "WIN"
+    return
+  fi
+
+  # Si no s'ha detectat cap "WIN", retorna un "NONE"
+  echo "NONE"
+}
+
+# 0.5 Envia a stdout si el moviment és vàlid (echo "VALID" o echo "NOT_VALID")
+# TODO: Per si utilitzeu aquesta versió, la manera de fer crida a la funció:
+#   valid_pos=$(check_valid_pos "$pos")
+check_valid_pos() {
+	local aux_pos="$1"
+
+	# 0.5.1 Comprova que aux_pos conté només dígits
+	if ! echo "$aux_pos" | grep -Eq '^[0-9]+$'; then 
+		echo "NOT_VALID"
+		return
+	fi
+
+	# 0.5.2 Comprova que aux_pos conté un nombre dins del tauler
+	if [ "$aux_pos" -lt 1 -o "$aux_pos" -gt 9 ]; then
+		echo "NOT_VALID"
+		return
+	fi
+
+	# 0.5.3 Comprova que aux_pos conté el nombre d'una casella no ocupada
+	local array_pos=$((aux_pos - 1))
+	local board_char="${BOARD[${array_pos}]}"
+	if [ "$board_char" = "$SERVER_CHAR" -o "$board_char" = "$CLIENT_CHAR" ]; then
+		echo "NOT_VALID"
+		return
+	fi
+
+	echo "VALID"
+}
+
+
+# 1 Espera connexió
+echo "Esperant connexió..."
 
 #Esperant rebuda de capçalera
-response=$(nc -l -p $PORT)
+msg=$(nc -l -p $PORT)
 
-if [[ "$response" != "OK" ]]; then
+# 2.1 Si la connexió no és un "HELLO", s'envia un "KO" i es tanca el programa
+if [[ "$msg" != "HELLO" ]]; then
+  echo "KO" | nc -q 0 $CLIENT_IP $PORT
   exit 1
 fi
 
-echo "Connexió establerta"
+# 2.2 Si la connexió és "HELLO", s'envia un "OK" i es continua el programa
+# If inclos per enviar resposta al client quan arriba el HELLO
+if [[ "$msg" == "HELLO" ]]; then
+  echo "OK" | nc -q 0 $CLIENT_IP $PORT
+fi
 
-while true; do
+# 3 Missatge de benvinguda a la partida
+echo "Benvinguts al tres en ratlla"
+# 3.1 Es printa el tauler buit
+print_board
 
-  echo "Esperant el torn ..."
+#S'envia el tauler al client
+#print_board | nc -q 0 $CLIENT_IP $PORT
 
-  # Sacaba el temps despera quan el servidor acaba el torn
-  response=$(nc -l -p $PORT)
-  echo $response  
+# 4 GameLoop
+while [[ "$result" != "WIN" ]]; do
 
+  # == TORN SERVIDOR ==
 
-  # TODO: Gestió de missatges rebuts
+  # 4.1 Es demana una posició al jugador servidor
+  # pos - guarda linput de lusuari
+  read -p "Posició del servidor (1-9): " pos
 
-  # SERVER_WIN  
-  if [[ "$response" == "SERVER_WIN" ]]; then
+  # board_index - guarda el resultat de $(( ... ))
+  board_index=$((pos - 1))
+
+  # assigna "O" a la casella BOARD[...]
+  BOARD[$board_index]="O"
+
+  # 4.2 Es comprova si s'ha guanyat (result="WIN" o result="NONE")
+  result=$(check_win)
+  if [[ "$result" == "WIN" ]]; then
+    # S'envia un "SERVER_WIN" al client
+    echo "SERVER_WIN" | nc -q 0 $CLIENT_IP $PORT
+    echo "SERVER_WIN"
+    print_board
     echo "Partida finalitzada"
     exit 0
   fi
 
-  # CLIENT_WIN
-  if [[ "$response" == "CLIENT_WIN" ]]; then
-    echo "Partida finalitzada"
-    exit 0
-  fi
-
-  # ...
+  # 4.3 Es printa el tauler
+  print_board
+  echo "Torn del client"
 
   # == TORN CLIENT ==
-  # TODO: pregunta posició i s'envia al servidor
-  # No sabem perque, pero el Nil ha descobert que si passes clientPos sense $
-  # server.sh agafa el numero de chars de la paraula clientPos
-  read -p "Posició del client (1-9): " clientPos
-  echo $clientPos | nc -q 0 $SERVER_IP $PORT
+  # 4.4 S'envia al client que comença el seu torn
+  echo "Et toca: " | nc -q 0 $CLIENT_IP $PORT
+
+  # 4.5 Es llegeix el moviment del client
+  response=$(nc -l -p $PORT)
+
+  # 4.6 S'actualitza el moviment al tauler
+  response=$(($response - 1))
+  BOARD[$response]="X"
+
+  # 4.7 Es comprova si s'ha guanyat (result="WIN" o result="NONE")
+  result=$(check_win)
+  if [[ "$result" == "WIN" ]]; then
+    # S'envia un "SERVER_WIN" al client
+    echo "CLIENT_WIN" | nc -q 0 $CLIENT_IP $PORT
+    echo "CLIENT_WIN"
+  fi
+
+  # 4.8 Es printa el tauler
+  print_board
+  
+  if [[ "$result" == "WIN" ]]; then
+    echo "Partida finalitzada"
+    exit 0
+  fi
 
 done
 
