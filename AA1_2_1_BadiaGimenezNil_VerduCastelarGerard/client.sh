@@ -18,7 +18,7 @@ fi
 
 echo "Permis concedit, connexió establerta"
 
-while [[ "$response"]]; do
+while true; do
 
   echo "Esperant el torn ..."
 
@@ -45,6 +45,6 @@ while [[ "$response"]]; do
 
 done
 
-echo "Partida finalitzada"
+echo "Partida finalitzada, fins la proxima :)"
 
 exit 0
