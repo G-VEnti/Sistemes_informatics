@@ -4,6 +4,17 @@ PORT=60000
 #Enviament de capçalera
 echo "HELLO" | nc -q 0 $SERVER_IP $PORT
 
+msg=$(nc -l -p $PORT)
+
+if [[ "$msg" != "OK_HEADER" ]]; then
+  echo "KO" | nc -q 0 $CLIENT_IP $PORT 
+  echo "[ERROR] Capcalera rebuda incorrecte." | tee -a $LOG_FILE
+  exit 1
+fi
+
+serverUser=$(nc -l -p $PORT)
+echo "$serverUser"
+
 read -p "Introdueix un nom d'usuari:" userName
 read -p "Introdueix una contrasenya:" password
 

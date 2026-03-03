@@ -10,9 +10,11 @@ if [[ "$msg" != "HELLO" ]]; then
   exit 1
 fi
 
+echo "Connexio establerta."
+
 salt=$RANDOM
 
-echo "OK HEADER" | nc -q 0 $CLIENT_IP $PORT
+echo "OK_HEADER" | nc -q 0 $CLIENT_IP $PORT
 echo "$salt" | nc -q 0 $CLIENT_IP $PORT
 
 hash_salt=$(printf "%s" "$salt" | sha256sum | cut -d' ' -f1)
