@@ -4,7 +4,13 @@ PORT=60000
 #Enviament de capçalera
 echo "HELLO" | nc -q 0 $SERVER_IP $PORT
 
+
+echo "Esperant capcalera"
 msg=$(nc -l -p $PORT)
+echo "msg: $msg"
+serverUser=$(nc -l -p $PORT)
+echo "serverUser: $serverUser"
+
 
 if [[ "$msg" != "OK_HEADER" ]]; then
   echo "KO" | nc -q 0 $CLIENT_IP $PORT 
@@ -12,7 +18,6 @@ if [[ "$msg" != "OK_HEADER" ]]; then
   exit 1
 fi
 
-serverUser=$(nc -l -p $PORT)
 echo "$serverUser"
 
 read -p "Introdueix un nom d'usuari:" userName
