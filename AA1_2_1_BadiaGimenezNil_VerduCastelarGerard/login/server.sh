@@ -15,13 +15,21 @@ elif [[ "$msg" == "HELLO" ]]; then
   echo "Connexio establerta, salt enviat."
 fi
 
+# Generacio del hash_salt
+hash_clientPassword=$(printf "%s" "awer" | sha256sum | cut -d' ' -f1)
+hash_salt=$(printf "%s%s" "$hash_clientPassword" "$salt")
 
+
+# Esperant missatge del client
 msg=$(nc -l -p $PORT)
 
-if [[ "$msg" != "AUTH" ]]; then
-  echo "KO_CAPCALERA" | nc -q 0 $CLIENT_IP $PORT 
+
+
+if [[ (echo $msg | cut -d " " -f 1) != "AUTH" ]]; then
+  echo "KO_FORMAT" | nc -q 0 $CLIENT_IP $PORT 
   echo "[ERROR] Capcalera rebuda incorrecte."
   exit 1
+elif [[ (echo $msg | cut -d ":" -f 1) != "GVC" -o (echo $msg | cut -d ":" -f 2) !=  ]]
 fi
 
 

@@ -28,7 +28,7 @@ read -p "Introdueix una contrasenya:" password
 hash_password=$(printf "%s" "$password" | sha256sum | cut -d' ' -f1)
 hash_salt=$(printf "%s%s" "$hash_password" "$serverSalt" | sha256sum | cut -d' ' -f1)
 
-echo "AUTH $userName $hash_salt" | nc -q 0 $SERVER_IP $PORT
+echo "AUTH $userName:$hash_salt" | nc -q 0 $SERVER_IP $PORT
 
 #Esperant rebuda de capçalera
 msg=$(nc -l -p $PORT)
