@@ -137,6 +137,7 @@ else
   echo "$connexionCheck" | tee -a $LOG_FILE | nc -q 0 $CLIENT_IP $PORT  
 fi
 
+# Es mostra un missatge en funcio al contingut de $connexionCheck
 if [[ "$connexionCheck" = "OK" ]]; then
   echo "Connexio establerta" | tee -a $LOG_FILE
 else
@@ -190,6 +191,8 @@ while [[ "$movementCounter" -le 9 ]]; do
     break
   fi
 
+  # Aquest if comproaba que movementCounter sigui inferior a 9
+  # D'aquesta manera es comproba la condicio d'empat
   if [[ "$movementCounter" -lt 9 ]]; then
 
     # 4.3 Es printa el tauler
@@ -231,6 +234,8 @@ while [[ "$movementCounter" -le 9 ]]; do
 
 done
 
+# Si el movementCounter es superior a 9 no haura entrat al if anterior
+# Si $result no es WIN significa que hi ha hagut un empat
 if [[ "$result" != "WIN" ]]; then
   echo "Empat" | tee -a $LOG_FILE | nc -q 0 $CLIENT_IP $PORT
   echo "Empat"
