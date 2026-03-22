@@ -1,8 +1,10 @@
 CLIENT_IP="10.0.2.15"
 PORT=60000
 
+
 # Esperant rebuda de capçalera
 msg=$(nc -l -p $PORT)
+
 
 # Validacio de la capçalera rebuda
 if [[ "$msg" != "HELLO" ]]; then
@@ -16,29 +18,36 @@ elif [[ "$msg" == "HELLO" ]]; then
 fi
 
 
+# Generacio del hash_salt
+hash_clientPassword=$(printf "%s" "awer" | sha256sum | cut -d' ' -f1)
+hash_salt=$(printf "%s%s" "$hash_clientPassword" "$salt" | sha256sum | cut -d' ' -f1)
+
+
+# Esperant missatge del client
 msg=$(nc -l -p $PORT)
 
+
+# Divisio del missatge rebut en capçalera, username i password
+clientUsername=$(echo $msg | cut -d " " -f 2)
+clientPassword=$(echo $clientUsername | cut -d ":" -f 2)
+clientUsername=$(echo $clientUsername | cut -d ":" -f 1)
+msg=$(echo $msg | cut -d " " -f 1)
+
+
+# Comproba la capçalera
 if [[ "$msg" != "AUTH" ]]; then
-  echo "KO_CAPCALERA" | nc -q 0 $CLIENT_IP $PORT 
+  echo "KO_FORMAT" | nc -q 0 $CLIENT_IP $PORT 
   echo "[ERROR] Capcalera rebuda incorrecte."
   exit 1
-fi
-
-
-clientUsername=$(nc -l -p $PORT)
-
-if [[ "$clientUsername" != "$salt" ]]; then
-  echo "KO_AUTH" | nc -q 0 $CLIENT_IP $PORT 
-  echo "[ERROR] Nom d'usuari incorrecte."
+# Comproba el nom d'usuari i la contraseña rebuda
+elif [[ "$clientUsername" != "GVC" || "$clientPassword" != "$hash_salt" ]]; then
+  echo "KO_AUTH" | nc -q 0 $CLIENT_IP $PORT
+  echo "[ERROR] Credencials incorrectes."
   exit 1
+else
+  echo "OK_AUTH" | nc -q 0 $CLIENT_IP $PORT
 fi
 
+echo "Login completat."
 
-clientHash=$(nc -l -p $PORT)
-if [[ "$clientHash" != "$hash_salt_salt" ]]; then
-  echo "KO_AUTH" | nc -q 0 $CLIENT_IP $PORT 
-  echo "[ERROR] Nom d'usuari incorrecte."
-  exit 1
-fi
-
-echo "OK_AUTH" | nc -q 0 $SERVER_IP $PORT
+exit 0

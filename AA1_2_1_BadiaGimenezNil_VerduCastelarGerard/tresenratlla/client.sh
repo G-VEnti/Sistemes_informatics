@@ -18,6 +18,7 @@ fi
 
 echo "Permis concedit, connexió establerta"
 
+# Bucle per al funcionament de la partida
 while true; do
 
   echo "Esperant el torn ..."
@@ -34,12 +35,8 @@ while true; do
     break
   fi
 
-  # ...
-
   # == TORN CLIENT ==
   # TODO: pregunta posició i s'envia al servidor
-  # No sabem perque, pero el Nil ha descobert que si passes clientPos sense $
-  # server.sh agafa el numero de chars de la paraula clientPos
   read -p "Posició del client (1-9): " clientPos
   echo $clientPos | nc -q 0 $SERVER_IP $PORT
 
